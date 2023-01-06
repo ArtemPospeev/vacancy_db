@@ -1,35 +1,43 @@
 '''
-В данном файле описана вся валидация
+В данном файле описана вся валидация.
 '''
 
 
-def name_is_valid(name: str) -> bool:
-    return False if (not name) or (len(name) < 3) or (name.strip() == '') else True
+class CustomValidationError(Exception):
+    def __init__(self, *args):
+        self.message = args[0]
+
+    def __str__(self):
+        return f'Ошибка ввода. {self.message} '
 
 
-def desc_is_valid(desc: str) -> bool:
-    return name_is_valid(desc)
+def name_validator(name: str) -> str:
+    if (not name) or (name.strip() == ''):
+        raise CustomValidationError('Название вакансии не может быть пустым')
+    return name
 
 
-def skills_is_valid(skills: str) -> bool:
-    return name_is_valid(skills)
+def desc_validator(desc: str) -> str:
+    if (not desc) or (desc.strip() == ''):
+        raise CustomValidationError('Описание вакансии не может быть пустым')
+    return desc
 
 
-def salary_is_valid(salary: str) -> bool:
+def skills_validator(skills: str) -> str:
+    if (not skills) or (skills.strip() == ''):
+        raise CustomValidationError('Введите хотя бы один ключевой навык')
+    return skills
+
+
+def salary_validator(salary: str) -> int:
     try:
-        salary = int(salary)
-        return True
+        return int(salary)
     except ValueError:
-        return False
-
-
-def employment_is_valid(employment: str) -> bool:
-    if employment.startswith('удал') or employment.startswith('в оф') or employment.startswith('смеш'):
-        return True
-    return False
+        raise CustomValidationError('Вы ввели не число, попробуйте ещё раз')
 
 
 def employment_validator(employment: str) -> str:
+    employment = employment.lower()
     if employment.startswith('уд'):
         employment = 'удаленно'
     elif employment.startswith('в'):
@@ -37,5 +45,5 @@ def employment_validator(employment: str) -> str:
     elif employment.startswith('см'):
         employment = 'смешанный'
     else:
-        employment = 'не указано'
+        raise CustomValidationError('Выберите один из трех типов: удаленный, смешанный или в офисе')
     return employment

@@ -56,7 +56,7 @@ class Vacancy(BaseModel):
         self.employment = employment
 
 
-def setup_db(url: str = URL, engine: Engine = ENGINE) -> None:
+def connect_db(url: str = URL, engine: Engine = ENGINE) -> None:
     '''
     Установка подключения к базе. Если база не создана - создает
     :param url: url до базы (формируется автоматически из конфигов)

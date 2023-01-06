@@ -1,51 +1,50 @@
-from db_setup import setup_db, save_in_db
-from validators import name_is_valid, desc_is_valid, skills_is_valid, salary_is_valid, employment_is_valid, \
-    employment_validator
+from typing import Callable
+
+from db_setup import connect_db, save_in_db
+from validators import name_validator, desc_validator, skills_validator, salary_validator, employment_validator, \
+    CustomValidationError
+
+
+def give_user_answer(question: str, validator: Callable[[str], str | int]) -> str | int:
+    '''
+    Запрашивает овтет у пользователя, пока ответ не пройдет валидацию.
+    Принимает вопрос и валидатор, возвращает прошедшие валидацию данные
+    :param question: вопрос
+    :param validator: валидатор
+    :return: отвалидированные данные
+    '''
+    while True:
+        answer = input(f'{question}: ')
+        try:
+            return validator(answer)
+        except CustomValidationError as err:
+            print(err.message)
+        except Exception:
+            print('Что-то пошло не так, попробуйте ещё раз')
 
 
 def request_vacancy_data() -> dict:
     '''
-    Запрашивает данные у пользователя
+    Запрашивает данные по вакансии у пользователя, возвращает словарь
     :return: dict -> словарь с описанием вакансии для сохранения
     '''
-    while True:
-        name = input('Введите наименование вакансии: ')
-        if name_is_valid(name):
-            break
-        print('Название вакансии не может быть пустым')
-    while True:
-        description = input('Описание вакансии: ')
-        if desc_is_valid(description):
-            break
-        print('Описание не может быть пустым')
-    while True:
-        hard_skills = input('Введите ключевые навыки: ')
-        if skills_is_valid(hard_skills):
-            break
-        print('Необходимо указать хотя бы один ключевой навык')
-    while True:
-        salary = input('Введите зарплату в рублях: ')
-        if salary_is_valid(salary):
-            salary = int(salary)
-            break
-        print('Вы ввели не число, попробуйте ещё раз')
-    while True:
-        employment = input('Введите тип занятости(удаленно, в офисе, смешанный): ').lower()
-        if employment_is_valid(employment):
-            employment = employment_validator(employment)
-            break
-        print('Выберите один из трех: удаленно, в офисе или смешанный')
+    name = give_user_answer('Введите название вакансии', name_validator)
+    description = give_user_answer('Введите описание вакансии', desc_validator)
+    hard_skills = give_user_answer('Введите ключевые навыки', skills_validator)
+    salary = give_user_answer('Введите зарплату в рублях', salary_validator)
+    employment = give_user_answer('Введите тип занятости(удаленно, в офисе, смешанный)', employment_validator)
+
     return {
         'name': name,
         'hard_skills': hard_skills,
-        'description': description,
+        'desc': description,
         'salary': salary,
         'employment': employment
     }
 
 
 def main():
-    setup_db()
+    connect_db()
     data = request_vacancy_data()
     save_in_db(data)
 
