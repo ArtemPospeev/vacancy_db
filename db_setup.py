@@ -1,25 +1,29 @@
+'''
+В данном файле описано все взаимодействие с базой данных, включая описание моделей
+'''
+
 from datetime import datetime
+from typing import Any
 from uuid import uuid4
 
-from config import db_name, host, user, password, port
+from sqlalchemy.future import Engine
+
+from config import URL
 from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy_utils import UUIDType
 from sqlalchemy_utils import database_exists, create_database
 
 Base = declarative_base()
-if not port:
-    URL = f"mysql+pymysql://{user}:{password}@{host}/{db_name}"
-else:
-    URL = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
 
 ENGINE = create_engine(URL, echo=True)
 SESSION = sessionmaker(bind=ENGINE)()
 
 
 class BaseModel(Base):
+    '''Абстрактный класс для наследования'''
     __abstract__ = True
     id = Column(UUIDType(binary=False), primary_key=True, default=uuid4)
     created_at = Column(DateTime, nullable=False, default=datetime.now())
@@ -34,6 +38,7 @@ class BaseModel(Base):
 
 
 class Vacancy(BaseModel):
+    '''Сущность вакансий'''
     __tablename__ = 'vacancies'
 
     name = Column(String(100), nullable=False)
@@ -42,7 +47,8 @@ class Vacancy(BaseModel):
     salary = Column(Integer, nullable=False)
     employment = Column(Enum('удаленно', 'смешанный график', 'в офисе'))
 
-    def __init__(self, name, desc, hard_skills, salary, employment):
+    def __init__(self, name: str, desc: str, hard_skills: str, salary: int, employment: str, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
         self.name = name
         self.desc = desc
         self.hard_skills = hard_skills
@@ -50,15 +56,26 @@ class Vacancy(BaseModel):
         self.employment = employment
 
 
-def save_in_db(data, session=SESSION):
-    obj = Vacancy(**data)
-    session.add(obj)
-    session.commit()
-
-
-def setup_db(url=URL, engine=ENGINE):
+def setup_db(url: str = URL, engine: Engine = ENGINE) -> None:
+    '''
+    Установка подключения к базе. Если база не создана - создает
+    :param url: url до базы (формируется автоматически из конфигов)
+    :param engine:
+    :return:
+    '''
     meta = MetaData()
     if not database_exists(url):
         create_database(url)
     meta.create_all(engine)
     Base.metadata.create_all(engine)
+
+
+def save_in_db(data: dict, session: Session = SESSION) -> None:
+    '''
+    Сохранение данных в базу
+    :param data: dict - данные для сохранения в базу
+    :param session: сессия
+    '''
+    obj = Vacancy(**data)
+    session.add(obj)
+    session.commit()
