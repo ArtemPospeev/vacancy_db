@@ -1,0 +1,72 @@
+[
+  {
+    "name": "python developer",
+    "desc": "Создание веб приложений на стеке python и react",
+    "hard_skills": "python, react, postgreSQL",
+    "salary": "70000",
+    "employment": "удаленно"
+  },
+  {
+    "name": "java developer",
+    "desc": "Разработка backend части приложения, автоматизирующего выдачу заказов",
+    "hard_skills": "java, node.js, DB",
+    "salary": "200000",
+    "employment": "удаленно"
+  },
+  {
+    "name": "senior python developer",
+    "desc": "Разработка ТГ ботов и ORM системы для внутреннего пользования",
+    "hard_skills": "python3, DB, Django, DRF, FLASK",
+    "salary": "300000",
+    "employment": "смешанный график"
+  },
+  {
+    "name": "JS junior dev",
+    "desc": "Разработка frontend части приложения",
+    "hard_skills": "JS, react, node.js",
+    "salary": "80000",
+    "employment": "в офисе"
+  },
+  {
+    "name": "Fullstack python dev",
+    "desc": "React + Django, приложение для поиска работы разработчикам",
+    "hard_skills": "Django, React, DRF, python",
+    "salary": "120000",
+    "employment": "в офисе"
+  },
+  {
+    "name": "python developer",
+    "desc": "Создание веб приложений на стеке python и react",
+    "hard_skills": "python, react, postgreSQL",
+    "salary": "60000",
+    "employment": "удаленно"
+  },
+  {
+    "name": "java developer",
+    "desc": "Разработка backend части приложения, автоматизирующего выдачу заказов",
+    "hard_skills": "java, node.js, DB",
+    "salary": "250000",
+    "employment": "удаленно"
+  },
+  {
+    "name": "senior python developer",
+    "desc": "Разработка ТГ ботов и ORM системы для внутреннего пользования",
+    "hard_skills": "python3, DB, Django, DRF, FLASK",
+    "salary": "280000",
+    "employment": "смешанный график"
+  },
+  {
+    "name": "JS junior dev",
+    "desc": "Разработка frontend части приложения",
+    "hard_skills": "JS, react, node.js",
+    "salary": "85000",
+    "employment": "в офисе"
+  },
+  {
+    "name": "Fullstack python dev",
+    "desc": "React + Django, приложение для поиска работы разработчикам",
+    "hard_skills": "Django, React, DRF, python",
+    "salary": "120000",
+    "employment": "в офисе"
+  }
+]

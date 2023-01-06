@@ -1,14 +1,14 @@
 '''
 В данном файле описано все взаимодействие с базой данных, включая описание моделей
 '''
-
+import json
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
 from sqlalchemy.future import Engine
 
-from config import URL
+from config import URL, JSON_DIR
 from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum, select
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
@@ -56,7 +56,7 @@ class Vacancy(BaseModel):
         self.employment = employment
 
 
-def connect_db(url: str = URL, engine: Engine = ENGINE) -> None:
+def connect_db(url: str, engine: Engine) -> None:
     '''
     Установка подключения к базе. Если база не создана - создает
     :param url: url до базы (формируется автоматически из конфигов)
@@ -76,11 +76,21 @@ def save_in_db(data: dict, session: Session = SESSION) -> None:
     :param data: dict - данные для сохранения в базу
     :param session: сессия
     '''
+    connect_db(URL, ENGINE)
     obj = Vacancy(**data)
     session.add(obj)
     session.commit()
 
 
+def filling_testing_data(file_name: str) -> None:
+    connect_db(URL, ENGINE)
+    with open(JSON_DIR / file_name, 'r', encoding='UTF-8') as f:
+        data = json.load(f)
+    for el in data:
+        save_in_db(el)
+
+
 def search_in_db(obj: str, session: Session = SESSION, table: BaseModel = Vacancy):
+    connect_db(URL, ENGINE)
     selected_vacancies = session.scalar(select(table).filter_by(name=obj))
     print(selected_vacancies)
