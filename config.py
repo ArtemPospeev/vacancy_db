@@ -8,6 +8,7 @@ host = 'localhost'
 user = 'root'
 password = ''
 port = ''
+DEBUG = False  # режим отладки (отображение запросов к базе)
 
 # Auto settings
 BASE_DIR = Path(__file__).resolve().parent

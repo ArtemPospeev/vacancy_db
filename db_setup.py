@@ -1,25 +1,26 @@
 '''
 В данном файле описано все взаимодействие с базой данных, включая описание моделей
 '''
-import json
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy.future import Engine
-
-from config import URL, JSON_DIR
-from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum, select
+from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.future import Engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import UUIDType
 from sqlalchemy_utils import database_exists, create_database
 
+import json
+from config import URL, JSON_DIR, DEBUG
+
 Base = declarative_base()
 
-ENGINE = create_engine(URL, echo=True)
-SESSION = sessionmaker(bind=ENGINE)()
+ENGINE = create_engine(URL, echo=DEBUG)
+DBSession = sessionmaker(bind=ENGINE)
 
 
 class BaseModel(Base):
@@ -58,7 +59,7 @@ class Vacancy(BaseModel):
 
 def connect_db(url: str, engine: Engine) -> None:
     '''
-    Установка подключения к базе. Если база не создана - создает
+    Установка подключения к базе
     :param url: url до базы (формируется автоматически из конфигов)
     :param engine:
     :return:
@@ -70,27 +71,68 @@ def connect_db(url: str, engine: Engine) -> None:
     Base.metadata.create_all(engine)
 
 
-def save_in_db(data: dict, session: Session = SESSION) -> None:
+@contextmanager
+def session_scope():
+    session = DBSession()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
+
+def save_in_db(data: dict | list[dict]) -> None:
     '''
     Сохранение данных в базу
-    :param data: dict - данные для сохранения в базу
+    :param data: dict or list[dict] - данные для сохранения в базу
     :param session: сессия
     '''
-    connect_db(URL, ENGINE)
-    obj = Vacancy(**data)
-    session.add(obj)
-    session.commit()
+    with session_scope() as s:
+        connect_db(URL, ENGINE)
+        if isinstance(data, list):
+            for el in data:
+                obj = Vacancy(**el)
+                s.add(obj)
+                s.commit()
+        else:
+            obj = Vacancy(**data)
+            s.add(obj)
+            s.commit()
 
 
 def filling_testing_data(file_name: str) -> None:
+    '''
+    Заполняет базу данными из файла
+    :param file_name: имя файла в папке json в корне проекта
+    :return: None
+    '''
     connect_db(URL, ENGINE)
     with open(JSON_DIR / file_name, 'r', encoding='UTF-8') as f:
         data = json.load(f)
-    for el in data:
-        save_in_db(el)
+    save_in_db(data)
 
 
-def search_in_db(obj: str, session: Session = SESSION, table: BaseModel = Vacancy):
+def search_by_name(search_obj: str, table: BaseModel = Vacancy) -> list | None:
+    '''
+    Поиск в базе данных по названию вакансии
+    :param search_obj: объект поиска
+    :param table: таблица для поиска
+    :return: list[dict] | None - список словарей с данными по вакансиям.
+    '''
+    result = []
     connect_db(URL, ENGINE)
-    selected_vacancies = session.scalar(select(table).filter_by(name=obj))
-    print(selected_vacancies)
+    with session_scope() as s:
+        selected_vacancies = s.query(table).filter(table.name.ilike(f'%{search_obj}%')).order_by(table.salary)
+        for el in selected_vacancies:
+            result.append({
+                'name': el.name,
+                'desc': el.desc,
+                'hard_skills': el.hard_skills,
+                'salary': el.salary,
+                'employment': el.employment,
+                'date': str(el.created_at)[:-7],
+            })
+        return result if result else None
