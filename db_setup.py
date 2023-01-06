@@ -9,7 +9,7 @@ from uuid import uuid4
 from sqlalchemy.future import Engine
 
 from config import URL
-from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum
+from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum, select
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -79,3 +79,8 @@ def save_in_db(data: dict, session: Session = SESSION) -> None:
     obj = Vacancy(**data)
     session.add(obj)
     session.commit()
+
+
+def search_in_db(obj: str, session: Session = SESSION, table: BaseModel = Vacancy):
+    selected_vacancies = session.scalar(select(table).filter_by(name=obj))
+    print(selected_vacancies)

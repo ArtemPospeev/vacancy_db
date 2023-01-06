@@ -1,6 +1,6 @@
 from typing import Callable
 
-from db_setup import connect_db, save_in_db
+from db_setup import connect_db, save_in_db, search_in_db
 from validators import name_validator, desc_validator, skills_validator, salary_validator, employment_validator, \
     CustomValidationError
 
@@ -43,11 +43,12 @@ def request_vacancy_data() -> dict:
     }
 
 
-def main():
+def main_save_data_in_db():
     connect_db()
     data = request_vacancy_data()
     save_in_db(data)
 
 
 if __name__ == '__main__':
-    main()
+    main_save_data_in_db()
+    search_in_db('python')
