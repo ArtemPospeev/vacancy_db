@@ -18,7 +18,7 @@ def name_validator(name: str) -> str:
     :return:
     '''
     if (not name) or (name.strip() == ''):
-        raise CustomValidationError('Название вакансии не может быть пустым')
+        raise CustomValidationError('Название вакансии не может быть пустым.')
     return name
 
 
@@ -29,7 +29,7 @@ def desc_validator(desc: str) -> str:
     :return:
     '''
     if (not desc) or (desc.strip() == ''):
-        raise CustomValidationError('Описание вакансии не может быть пустым')
+        raise CustomValidationError('Описание вакансии не может быть пустым.')
     return desc
 
 
@@ -40,7 +40,7 @@ def skills_validator(skills: str) -> str:
     :return:
     '''
     if (not skills) or (skills.strip() == ''):
-        raise CustomValidationError('Введите хотя бы один ключевой навык')
+        raise CustomValidationError('Введите хотя бы один ключевой навык.')
     return skills
 
 
@@ -53,13 +53,13 @@ def salary_validator(salary: str) -> int:
     try:
         return int(salary)
     except ValueError:
-        raise CustomValidationError('Вы ввели не число, попробуйте ещё раз')
+        raise CustomValidationError('Вы ввели не число, попробуйте ещё раз.')
 
 
 def employment_validator(employment: str) -> str:
     '''
     Валидирует данные по типу работы. Проверяет на орфографические ошибки и
-    приводит к нужному регистру для записи в базу
+    приводит к нужному виду для записи в базу
     :param employment:
     :return:
     '''
@@ -69,7 +69,7 @@ def employment_validator(employment: str) -> str:
     elif employment.startswith('в'):
         employment = 'в офисе'
     elif employment.startswith('см'):
-        employment = 'смешанный'
+        employment = 'смешанный график'
     else:
-        raise CustomValidationError('Выберите один из трех типов: удаленный, смешанный или в офисе')
+        raise CustomValidationError('Выберите один из трех типов: удаленный, смешанный или в офисе.')
     return employment

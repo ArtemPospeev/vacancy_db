@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from sqlalchemy import String, Column, Boolean, Integer, DateTime, Enum
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.exc import NoSuchModuleError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import Engine
 from sqlalchemy.orm import sessionmaker
@@ -19,8 +20,12 @@ from config import URL, JSON_DIR, DEBUG
 
 Base = declarative_base()
 
-ENGINE = create_engine(URL, echo=DEBUG)
-DBSession = sessionmaker(bind=ENGINE)
+try:
+    ENGINE = create_engine(URL, echo=DEBUG)
+    DBSession = sessionmaker(bind=ENGINE)
+except NoSuchModuleError:
+    print('Проблема с подключением к базе данных. Проверьте файл config.py.\nДанные не внесены.')
+    exit(2)
 
 
 class BaseModel(Base):
@@ -46,7 +51,7 @@ class Vacancy(BaseModel):
     desc = Column(String(500), nullable=False)
     hard_skills = Column(String(300), nullable=False)
     salary = Column(Integer, nullable=False)
-    employment = Column(Enum('удаленно', 'смешанный график', 'в офисе', 'не указано'))
+    employment = Column(Enum('удаленно', 'смешанный график', 'в офисе'))
 
     def __init__(self, name: str, desc: str, hard_skills: str, salary: int, employment: str, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
@@ -73,6 +78,10 @@ def connect_db(url: str, engine: Engine) -> None:
 
 @contextmanager
 def session_scope():
+    '''
+    Генератор сессий для подключений к базе
+    :return:
+    '''
     session = DBSession()
     try:
         yield session
@@ -96,11 +105,9 @@ def save_in_db(data: dict | list[dict]) -> None:
             for el in data:
                 obj = Vacancy(**el)
                 s.add(obj)
-                s.commit()
         else:
             obj = Vacancy(**data)
             s.add(obj)
-            s.commit()
 
 
 def filling_testing_data(file_name: str) -> None:
@@ -126,6 +133,28 @@ def search_by_name(search_obj: str, table: BaseModel = Vacancy) -> list | None:
     connect_db(URL, ENGINE)
     with session_scope() as s:
         selected_vacancies = s.query(table).filter(table.name.ilike(f'%{search_obj}%')).order_by(table.salary)
+        for el in selected_vacancies:
+            result.append({
+                'name': el.name,
+                'desc': el.desc,
+                'hard_skills': el.hard_skills,
+                'salary': el.salary,
+                'employment': el.employment,
+                'date': str(el.created_at)[:-7],
+            })
+        return result if result else None
+
+
+def select_all_from_table(table: BaseModel = Vacancy) -> list | None:
+    '''
+    Показать все неудаленные вакансии
+    :param table: таблица для поиска
+    :return: list[dict] | None - список словарей с данными по вакансиям.
+    '''
+    result = []
+    connect_db(URL, ENGINE)
+    with session_scope() as s:
+        selected_vacancies = s.query(table).filter(table.is_deleted == 0).order_by(table.salary)
         for el in selected_vacancies:
             result.append({
                 'name': el.name,
