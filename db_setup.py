@@ -45,7 +45,7 @@ class Vacancy(BaseModel):
     desc = Column(String(500), nullable=False)
     hard_skills = Column(String(300), nullable=False)
     salary = Column(Integer, nullable=False)
-    employment = Column(Enum('удаленно', 'смешанный график', 'в офисе'))
+    employment = Column(Enum('удаленно', 'смешанный график', 'в офисе', 'не указано'))
 
     def __init__(self, name: str, desc: str, hard_skills: str, salary: int, employment: str, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
