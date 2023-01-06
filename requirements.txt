@@ -1,0 +1,4 @@
+greenlet==2.0.1
+SQLAlchemy==1.4.46
+SQLAlchemy-Utils==0.39.0
+uuid==1.30
