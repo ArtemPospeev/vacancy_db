@@ -24,7 +24,7 @@ try:
     ENGINE = create_engine(URL, echo=DEBUG)
     DBSession = sessionmaker(bind=ENGINE)
 except NoSuchModuleError:
-    print('Проблема с подключением к базе данных. Проверьте файл config.py.\nДанные не внесены.')
+    print('Проблема с подключением к базе данных. Проверьте файл config.py.\n')
     exit(2)
 
 
