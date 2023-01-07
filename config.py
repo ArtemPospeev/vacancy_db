@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # User settings
-db_type = 'sqlite'  # postgresql, oracle, .. || sqlite
+db_type = 'mysql'  # postgresql, oracle, .. || sqlite
 driver = 'pymysql'  # psycopg2, cx_oracle, ..
 db_name = 'vacancy_db'
 host = 'localhost'
